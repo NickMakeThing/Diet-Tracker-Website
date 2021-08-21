@@ -8,19 +8,17 @@ import hashlib
 class Index(TemplateView):
     template_name='index.html'
     def get_context_data(self, **kwargs):
-        #from django.db import connection
-        #print(connection.queries)
-        #does 3 queeries right now
-        #can possibly render stats into some variable within a <script> tag
         stats={}
-        weight_changes = list(WeightChange.objects.all().prefetch_related('product'))
-        products = Product.objects.all()
-        for i in products:
-            events = [x for x in weight_changes if x.product == i]
-            stats[i.code] = {
-                'name':i.name, 
-                'events':[[x.date_time,x.weight_change] for x in events]
-                }
+        weight_changes = WeightChange.objects.all().prefetch_related('product').order_by('product__code','date_time')
+        product = None
+        for i in weight_changes:
+            if i.product.code not in stats:
+                stats[i.product.code] = {
+                    'name':i.product.name, 
+                    'events':[[i.date_time, i.weight_change]] 
+                    }
+            else:
+                stats[i.product.code]['events'].append([i.date_time, i.weight_change])
         context = super().get_context_data()
         context['stats'] = stats
         return context
