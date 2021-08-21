@@ -1,3 +1,12 @@
 {% load static %}
-daniels crzy website w
-<img src="{% static 'testimage.png' %}">
+<head>
+    <script src="{% static 'plotly-2.3.1.min.js' %}"></script>
+</head>
+<img src="{% static 'testimage.png' %}"/>
+<script>
+//render data in here and assign it to session storage
+    Plotly.plot('chart',[{
+        y:[100],
+        type:'line'
+    }])
+</script>
