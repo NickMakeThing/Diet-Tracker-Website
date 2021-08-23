@@ -16,7 +16,7 @@ class Product(models.Model):
     energy = models.IntegerField()
     protein = models.IntegerField()
     fat = models.IntegerField()
-    carb = models.IntegerField()
+    carbs = models.IntegerField()
     sugars = models.IntegerField()
 
 class WeightChange(models.Model):

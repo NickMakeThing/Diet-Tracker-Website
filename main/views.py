@@ -27,6 +27,8 @@ class Index(TemplateView):
         return render(request, self.template_name, self.get_context_data())
 
 class ReceiveProductInformation(CreateAPIView):
+    #lacks validation 
+    #need control to only accept only from rpi. maybe use password from env variable.
     http_method_names = ['post']
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -50,27 +52,27 @@ class ReceiveProductInformation(CreateAPIView):
                 energy = data['energy'],
                 protein = data['protein'],
                 fat = data['fat'],
-                carb = data['carb'],
+                carbs = data['carbs'],
                 sugars = data['sugars'],
             )
         return Response('hey')
         
 
 def hash_product(data):
-    data = data['energy'] + data['protein'] + data['fat'] + data['carb']
+    data = data['energy'] + data['protein'] + data['fat'] + data['carbs']
     byte_dict = bytes(str(data),'utf-8')
     return hashlib.md5(byte_dict).hexdigest()
 
 """
 var xhr = new XMLHttpRequest();  
-xhr.open("POST", "/api");
+xhr.open("POST", "/api/");
 xhr.setRequestHeader("Content-Type", "application/json;");
 xhr.send(JSON.stringify({ 
     "weight": 100,
     "energy":500,
     "protein":5,
     "fat":2,
-    "carb":3,
+    "carbs":3,
     "sugars":1
 }));
 """
