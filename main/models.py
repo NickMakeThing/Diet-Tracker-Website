@@ -12,14 +12,14 @@ foreign_key: product, date/time, consumption_amount/weight_change
 class Product(models.Model):
     code = models.CharField(max_length=50,null=False,unique=True)
     name = models.CharField(max_length=50,null=True)
-    current_weight = models.IntegerField()
-    energy = models.IntegerField()
-    protein = models.IntegerField()
-    fat = models.IntegerField()
-    carbs = models.IntegerField()
-    sugars = models.IntegerField()
+    current_weight = models.FloatField()
+    energy = models.FloatField()
+    protein = models.FloatField()
+    fat = models.FloatField()
+    carbs = models.FloatField()
+    sugars = models.FloatField()
 
 class WeightChange(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
     date_time = models.CharField(max_length=14) #change to datetime field
-    weight_change = models.IntegerField()
+    weight_change = models.FloatField()
