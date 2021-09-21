@@ -21,5 +21,5 @@ class Product(models.Model):
 
 class WeightChange(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
-    date_time = models.CharField(max_length=14) #change to datetime field
+    date_time = models.CharField(max_length=25) #change to datetime field
     weight_change = models.FloatField()
