@@ -18,7 +18,7 @@ class Index(TemplateView):
                     'energy':i.product.energy,
                     'protein':i.product.protein,
                     'fat':i.product.fat,
-                    'carbs:'i.product.carbs,
+                    'carbs':i.product.carbs,
                     'events':[[i.date_time, i.weight_change]] 
                     }
             else:
