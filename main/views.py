@@ -4,6 +4,7 @@ from .models import Product, WeightChange
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 import hashlib
+import json
 
 class Index(TemplateView):
     template_name='index.html'
@@ -24,7 +25,7 @@ class Index(TemplateView):
             else:
                 stats[i.product.code]['events'].append([i.date_time, i.weight_change])
         context = super().get_context_data()
-        context['stats'] = stats
+        context['stats'] = json.dumps(stats)
         return context
 
     def get(self, request):
