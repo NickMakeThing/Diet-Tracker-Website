@@ -64,7 +64,7 @@ class ReceiveProductInformation(CreateAPIView):
         
 
 def hash_product(data):
-    data = data['energy'] + data['protein'] + data['fat'] + data['carbs']
+    data = str(data['energy']) + str(data['protein']) + str(data['fat']) + str(data['carbs'])
     byte_dict = bytes(str(data),'utf-8')
     return hashlib.md5(byte_dict).hexdigest()
 
