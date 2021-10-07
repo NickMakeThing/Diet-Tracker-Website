@@ -92,10 +92,10 @@
   </div>
   <div class="right-container">
     <span class="nutrients">
-      <span>energy<input type="checkbox" id="energy" checked="true" onclick="create_graph()" ></span>
-      <span>protein<input type="checkbox" id="protein" checked="true" onclick="create_graph()" style=" background-color: red;"></span>
-      <span>fat<input type="checkbox" id="fat" checked="true" onclick="create_graph()"></span>
-      <span>carbs<input type="checkbox" id="carbs" checked="true" onclick="create_graph()"></span>
+      <span>energy<input type="radio" name="macro" value=energy id="energy" checked="true" onclick="create_graph()" ></span>
+      <span>protein<input type="radio" name="macro" value=protein id="protein" onclick="create_graph()" style=" background-color: red;"></span>
+      <span>fat<input type="radio" name="macro" value=fat id="fat" onclick="create_graph()"></span>
+      <span>carbs<input type="radio" name="macro" value=carbs id="carbs" onclick="create_graph()"></span>
     </span>
     <div class="graph" id='chart'></div>
     <div class="buttons">
