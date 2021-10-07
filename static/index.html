@@ -121,7 +121,7 @@
 </div>
 </body>
 <script>
-  consumption_data='{{ stats|safe }}'
+  consumption_data="{{ stats|safe }}"
   a=JSON.parse(consumption_data)
   console.log(a)
   chart = document.getElementById('chart')
