@@ -1,23 +1,469 @@
 {% load static %}
+<!DOCTYPE html>
+<html>
 <head>
-    <script src="https://cdn.plot.ly/plotly-2.3.1.min.js"></script>   
-    <link rel="shortcut icon" href="#"> 
+<title>Major Group Project</title>
+<script src="https://cdn.plot.ly/plotly-2.3.1.min.js"></script>
+<link rel="shortcut icon" href="#">
 </head>
+<style>
+  /* body {border-color:red} */
+.super-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.left-container {
+  height: 320px;
+  width: 450px;
+}
+.right-container {
+}
+.graph {
+  height: 600px;
+  width: 750px;
+  border-style: solid;
+  float: left;
+  overflow: visible;
+  z-index:1;
+}
+.controls-container {
+  height: 200px;
+  width: 750px;
+  /* clear:left; */
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 
-<img src="{% static 'testimage.png' %}"/>
+}
+.buttons {
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+.nutrients {
+  display: flex;
+  flex-direction: row;
+  width: 750px;
+  justify-content: space-evenly;
+}
+.modebar{
+  display: none !important;
+}
 
-<div id='chart' style="width:600px;height:250px;"></div>
+.chart-type{
+  float: left;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  width: 750px
+}
 
+#inactivity{
+  width:125px;
+  height:25px;
+}
+.nutrients input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -o-appearance: none;
+}
+@media screen and (max-width: 1300px) {
+  .super-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+}
+@media screen and (max-width: 875px) {
+  .right-container{
+    transform: scale(0.75);
+    margin-left: -70px;
+  }
+}
+</style>
+<body>
+<h1>Nutrition/Consumption Tracker</h1>
+<div class="super-container">
+  <div class="left-container">
+    <p>About Section</p>
+  </div>
+  <div class="right-container">
+    <span class="nutrients">
+      <span>energy<input type="checkbox" id="energy" checked="true" onclick="create_graph()" ></span>
+      <span>protein<input type="checkbox" id="protein" checked="true" onclick="create_graph()" style=" background-color: red;"></span>
+      <span>fat<input type="checkbox" id="fat" checked="true" onclick="create_graph()"></span>
+      <span>carbs<input type="checkbox" id="carbs" checked="true" onclick="create_graph()"></span>
+    </span>
+    <div class="graph" id='chart'></div>
+    <div class="buttons">
+      <span><input type="radio" name="time" value="yearly" checked onclick="create_graph()">yearly</span>
+      <span><input type="radio" name="time" value="monthly" onclick="create_graph()">monthly</span>
+      <span><input type="radio" name="time" value="weekly" onclick="create_graph()">weekly</span>
+      <span><input type="radio" name="time" value="daily" onclick="create_graph()">daily</span>
+    </div>
+    <div class='chart-type'>
+      <span>Lines<input type="radio" name="format" id="lines" checked='true' onclick="create_graph()"></span> 
+      <span>Bars<input type="radio" name="format" id="bars" onclick="create_graph()"></span>
+    </div>
+      <div class='controls-container'>
+        <button id='inactivity' onclick="show_inactivity(this)">Show Inactivity</button>
+        <!-- <div>
+          <button id='pag-left'>&lt;-</button>
+          <span id='pag-text'></span>
+          <button id='pag-right'>-&gt;</button>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</div>
+</body>
 <script>
-    a=String("{{ stats }}")
-    console.log(a)
-    chart = document.getElementById('chart')
-    function getData() {
-        return Math.random();
+  consumption_data='{{ stats|safe }}'
+  a=JSON.parse(consumption_data)
+  console.log(a)
+  chart = document.getElementById('chart')
+  lines_setting = document.getElementById('lines')
+  bars_setting = document.getElementById('bars')
+  buttons = document.getElementsByClassName('buttons')[0].getElementsByTagName('input')
+  
+  function show_inactivity(inactivity_button){
+    if (inactivity_button.innerText == 'Show Inactivity'){
+      inactivity_button.innerText = 'Hide Inactivity'
+    } else if (inactivity_button.innerText == 'Hide Inactivity'){
+      inactivity_button.innerText  = 'Show Inactivity'
     }
-        Plotly.newPlot(chart,[{
-            x:[1,2,3,4,5,6],
-            y:[1,2,3,4,5,6],
+    create_graph()
+  }
+  function collect(data){
+    var events = []
+    var dates = []
+    for (product in data){
+      for (event of data[product].events){
+        date = new Date(event[0].replace(" ","T"))
+        dates.push(date)
+        events.push({
+          energy : {y:(event[1]/100)*data[product].energy, x: date}, 
+          protein : {y:(event[1]/100)*data[product].protein, x: date}, 
+          fat : {y:(event[1]/100)*data[product].fat, x: date}, 
+          carbs : {y:(event[1]/100)*data[product].carbs, x: date} 
+        })
+      }
+    }
+    events.sort(function(a,b){return a.energy.x.getTime() - b.energy.x.getTime()})//may have to return this into a var?
+    return {events:events, dates:dates}
+  }
 
-        }])
+  function get_time_range(dates){
+    var date_max = new Date("1900-09-22T00:46:24.679");
+    var date_min = new Date("3000-09-22T00:46:24.679");
+    for (date of dates){
+      if (date > date_max){
+        date_max = date
+      }
+      if (date < date_min){
+        date_min = date
+      }
+    }
+
+    return {max: date_max, min: date_min}
+  }
+
+  function pad(period, next_period, events, event, getter, setter){
+    date = event.energy.x
+    new_events=[]
+    if (next_period != period+1){
+      event_index = events.indexOf(event)
+      difference = next_period - period
+      for (let j=1;j<difference;j++){
+        date = new Date(date)
+        setter(date,getter(date) + 1) 
+        new_event = {
+          energy : {y:0, x: date},
+          protein : {y:0, x: date},
+          fat : {y:0, x: date},
+          carbs : {y:0, x: date},
+        } 
+        new_events.push(new_event)
+      }
+    }
+    if(new_events.length){
+      padding = {event:event,new_events:new_events}
+      return padding
+    } else {
+      return {}
+    }
+  }
+
+  function pad_events(events,date_format){
+    events_copy = [...events]
+    pads = []
+    for(i of events_copy){
+      padding = {}
+      event_index = events.indexOf(i)
+      next_i = events[event_index+1] //break if doesnt exist or end of the list
+      // date = date.setHours(date.getHours() + 1)// date = date.setDate(date.getDate() + 1)// date = date.setMonth(date.getMonth() + 1)
+      if(next_i != undefined){
+        if (date_format == 'daily') {
+          padding = pad(
+              parseInt(i.energy.x/36e5), //hour of event
+              parseInt(next_i.energy.x/36e5), //nexthour of event
+              events_copy, 
+              i, 
+              (date) => {return date.getHours()}, 
+              (date,hours) => {date.setHours(hours);date.setMinutes(0)}
+            )
+        } else if (date_format == 'weekly'){
+          padding = pad(
+              parseInt(i.energy.x.toDateString().split([' '])[2]), //day of event
+              parseInt(next_i.energy.x.toDateString().split([' '])[2]), //next day of event
+              events_copy, 
+              i, 
+              (date) => {return date.getDate()}, 
+              (date,days) => {date.setDate(days)}
+            )
+        } else if (date_format == 'monthly'){//this one is difficult (months not padded until implemented)
+        } else if (date_format == 'yearly'){
+          padding = pad(
+            i.energy.x.getMonth(),
+            next_i.energy.x.getMonth(),
+            events_copy,
+            i,
+            (date) => {return date.getMonth()},        
+            (date,months) => {date.setMonth(months)},
+          )
+        }
+        if (Object.keys(padding).length) pads.push(padding)
+      }
+    }
+    for (i of pads){
+      event_index = events_copy.indexOf(i.event)
+      events_copy.splice(event_index+1 ,0 , i.new_events)
+    }
+    events_copy = events_copy.flat()
+    return events_copy
+  }
+
+  function aggregate_events(events, date_format) {
+    let getPeriod, getDateFormat
+    if (date_format == 'daily') {
+      getPeriod = event => parseInt(event.energy.x / 36e5)
+    } else if (date_format == 'weekly'){
+      getPeriod = event => event.energy.x.toDateString().split([' '])[2]
+    } else if (date_format == 'monthly'){
+      getPeriod = event => week_number(event.energy.x)
+    } else if (date_format == 'yearly'){
+      getPeriod = event => event.energy.x.getMonth()
+    }
+    return events.reduce((evs, event, idx) => {
+      if (idx === 0 ) return [event] 
+      const prevPeriod = getPeriod(events[idx - 1])
+      const period = getPeriod(event)
+      if(period !== prevPeriod) {
+        return [...evs, event]
+      } else {
+        const prevEvent = events[idx - 1]
+        prevEvent.energy.y += event.energy.y
+        prevEvent.protein.y += event.protein.y
+        prevEvent.fat.y += event.fat.y
+        prevEvent.carbs.y += event.carbs.y
+        return evs
+      }
+    }, [])
+  }
+
+  function week_number(date) {
+    year = date.getFullYear()
+    month = date.getMonth()
+    day = date.getDate()
+    UTCdate = Date.UTC(year, month, day)
+    date = new Date(UTCdate);
+    thursday = date.getUTCDate() + 4
+    sunday = (date.getUTCDay()||7)
+    date.setUTCDate(thursday - sunday);
+    first_day = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+    week = Math.ceil(( ( (date - first_day) / 86400000) + 1)/7);
+    return week;
+  }
+
+  function setup_bars(bars){
+    selected = []
+    width=1
+    bars.map( bar => {
+      if (document.getElementById(bar.name).checked){
+        width = width-0.2
+        bar.x = []
+        bar.y = []
+        bar.hoverinfo="x+y"
+        
+        if (bars_setting.checked) bar.type='bar'
+        bar.width = width
+        selected.push(bar)
+      }
+    })
+    selected[0].yaxis='y'
+    return selected
+  }
+
+  function assign(bars,events){
+    events.map(event => {
+      bars.map( bar => {
+        bar.x.push(event[bar.name].x)
+        bar.y.push(event[bar.name].y)
+      }) 
+    })
+  }
+
+  function format_time(events,range){
+    for(let i=0;i<events.length;i++){
+      for(macro in events[i]){
+        macro = events[i][macro]
+        dmy = macro.x.toLocaleDateString('en-GB')
+        hour = macro.x.toLocaleString('en-GB').split(' ')[1].slice(0,2)
+        hour = hour + '-' +(dmy.slice(0,5))
+        dmy = dmy.slice(0,6) + dmy.slice(8,10)
+        if(range == 'daily'){
+          macro.x = hour
+        } else {
+          macro.x = dmy
+        }
+      }
+    }
+    return events
+  }
+  function create_graph(){ 
+    var inactivity_button = document.getElementById('inactivity')
+    var energy = {name : 'energy' , marker : {color:'blue'}, ticklen:53}
+    var protein = {name : 'protein' , marker : {color:'red'}, yaxis:'y2', ticklen:35}
+    var fat = {name : 'fat' , marker : {color:'orange'}, yaxis:'y3', ticklen:17}
+    var carbs = {name : 'carbs' , marker : {color:'green'}, yaxis:'y4', ticklen:0}
+    var selected = []
+    var dates = []
+    
+    for (i of buttons){
+      if (i.checked){
+      var date_format=i.value
+      }
+    }
+
+    events_dates = collect(a)
+    dates = events_dates.dates
+    if (inactivity_button.innerText == 'Hide Inactivity'){
+      padded_events = pad_events(events_dates.events, date_format)
+      aggregated_events = aggregate_events(padded_events, date_format)
+    } else {
+      aggregated_events = aggregate_events(events_dates.events, date_format)
+    }
+    events = format_time(aggregated_events,date_format)
+    if (bars_setting.checked || lines_setting.checked){
+      bars = setup_bars([energy,protein,fat,carbs]) //these are copied and added as lines later
+      var first_yaxis_color = bars[0].marker.color
+      var first_yaxis_ticklen = bars[0].ticklen
+    }
+
+    assign(bars, events)
+    dates = get_time_range(dates.flat())
+    x_labels=[]
+    for(i of bars[0].x){
+      x_labels.push(i)
+    }
+
+    layout = {
+      margin: {
+        l: 90,
+        r: 32,
+        b: 32,
+        t: 0,
+        pad: 0
+      },
+      annotations:[{showarrow:false,text:''}],
+      showlegend: false,
+      yaxis: {  
+        showspikes: true,
+        fixedrange:true,
+        rangemode: 'tozero',
+        ticklen:first_yaxis_ticklen,
+        tickfont:{color:first_yaxis_color}
+      },
+      yaxis2: {  
+        showspikes: true,
+        fixedrange:true,
+        rangemode: 'tozero',
+        overlaying:'y',
+        ticklen:35,
+        tickfont:{color:'red'}
+      },
+      hovermode:"closest",
+      yaxis3: {  
+        showspikes: true,
+        fixedrange:true,
+        rangemode: 'tozero',
+        overlaying:'y',
+        ticklen:17,
+        tickfont:{color:'orange'}
+      },
+      yaxis4: {  
+        showspikes: true,
+        fixedrange:true,
+        rangemode: 'tozero',
+        showdividers:false,
+        position:0,
+        overlaying:'y',
+        tickfont:{color:'green'}
+      },
+      xaxis: {
+        showspikes: true,
+        fixedrange:true,
+        range: [dates.min, dates.max], 
+        // range: x_labels, 
+        tickmode:'linear',
+        zeroline: true,
+      }
+        
+    }
+    if (x_labels.length > 7) {
+      layout.margin.b = 69
+      layout.xaxis.tickangle = 55
+      layout.xaxis.tickfont = {size:14,}
+    }
+    if (x_labels.length > 30) {
+      document.getElementById('chart').style='overflow:scroll;'
+      layout.width = 22*x_labels.length
+    } else {
+      document.getElementById('chart').style=''
+    }
+
+    lines = []
+    if (bars.length){
+      // adjust_timeline(bars,dates,layout)
+      if (lines_setting.checked){
+        bars.map(bar => {
+          new_line = {...bar}
+          // if (new_line.name == 'energy') new_line.marker = {color:'rgb()'}
+          new_line.type = 'scatter'
+          lines.push(new_line)
+        })
+      }
+      selected = [bars, lines].flat()
+      console.log(a, selected, x_labels.length)
+    } 
+    
+    Plotly.newPlot(chart, selected, layout)
+    ticks = document.getElementsByClassName('ticks')
+    for (tick of ticks){
+      tick.style=''
+      // console.log(tick)
+    }
+  }
+  create_graph()
+
+  // function paginate(x,date_format){
+  //   if (date_format == 'daily'){
+  //     total_days = Math.ceil(x.length/24)
+  //     current_day = 1
+  //   }
+  // }
 </script>
+</html>
