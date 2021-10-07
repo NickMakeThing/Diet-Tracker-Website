@@ -40,9 +40,9 @@ class ReceiveProductInformation(CreateAPIView):
         product_code = hash_product(data)
         product = Product.objects.filter(code=product_code) #returns as a queryset. [0] gets the actual object
         if product.exists(): #count() if exists doesnt work
-            if data['weight'] >= product[0].current_weight + 40:#need to do something here to compensate for the possibility of current_weight going into negatives
+            if data['weight'] >= product[0].current_weight + 10:#need to do something here to compensate for the possibility of current_weight going into negatives
                 product.update(current_weight=data['weight'])
-            elif data['weight'] <= product[0].current_weight - 40:
+            elif data['weight'] <= product[0].current_weight - 10:
                 weight_change = product[0].current_weight - data['weight']
                 product.update(current_weight=data['weight'])
                 WeightChange.objects.create(
