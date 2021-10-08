@@ -338,6 +338,7 @@ h1 {
         width=width
         bar.x = []
         bar.y = []
+        bar.hovertemplate = bar.name+": " + bar.hovertemplate
         bar.hoverinfo="x+y"
         bar.offsetgroup = count
         count++
@@ -377,11 +378,12 @@ h1 {
     return events
   }
   function create_graph(){ 
+    var hovertemplate = '%{y:,.0f}<br>'+'date: %{x:x%}' + "<extra></extra>"
     var inactivity_button = document.getElementById('inactivity')
-    var energy = {name : 'energy' , marker : {color:'blue'}, ticklen:53}
-    var protein = {name : 'protein' , marker : {color:'red'}, yaxis:'y2', ticklen:35}
-    var fat = {name : 'fat' , marker : {color:'orange'}, yaxis:'y3', ticklen:17}
-    var carbs = {name : 'carbs' , marker : {color:'green'}, yaxis:'y4', ticklen:0}
+    var energy = {name : 'energy' , marker : {color:'blue'}, ticklen:53, hovertemplate: hovertemplate}
+    var protein = {name : 'protein' , marker : {color:'red'}, yaxis:'y2', ticklen:35, hovertemplate: hovertemplate}
+    var fat = {name : 'fat' , marker : {color:'orange'}, yaxis:'y3', ticklen:17, hovertemplate: hovertemplate}
+    var carbs = {name : 'carbs' , marker : {color:'green'}, yaxis:'y4', ticklen:0, hovertemplate: hovertemplate}
     var selected = []
     var dates = []
     
