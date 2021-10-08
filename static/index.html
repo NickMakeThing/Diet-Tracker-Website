@@ -378,7 +378,7 @@ h1 {
     return events
   }
   function create_graph(){ 
-    var hovertemplate = '%{y:,.0f}<br>'+'date: %{x:x%}' + "<extra></extra>"
+    var hovertemplate = '%{y:,.0f}<br>'+'date: %{x}' + "<extra></extra>"
     var inactivity_button = document.getElementById('inactivity')
     var energy = {name : 'energy' , marker : {color:'blue'}, ticklen:53, hovertemplate: hovertemplate}
     var protein = {name : 'protein' , marker : {color:'red'}, yaxis:'y2', ticklen:35, hovertemplate: hovertemplate}
