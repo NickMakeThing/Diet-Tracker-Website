@@ -420,6 +420,7 @@ h1 {
       aggregated_events = aggregate_events(events_dates.events, date_format)
     }
     events = format_time(aggregated_events,date_format)
+
     if (bars_setting.checked || lines_setting.checked){
       bars = setup_bars([energy,protein,fat,carbs]) //these are copied and added as lines later
       if (bars.length){
@@ -428,6 +429,18 @@ h1 {
       }
     }
 
+    /*
+    to fix y axis. get values from trace/bar/lines, find the max y value
+    depending on the value and the line/bar name, adjust the ticklen 
+      var max_value = arr.reduce(function(a, b) {
+        return Math.max(a, b);
+      }, 0);
+    */
+
+    x_line_pos = 0.03
+    if (typeof InstallTrigger !== 'undefined'){//checks if browser is firefox
+        x_line_pos = 0.06
+    }
     assign(bars, events)
     dates = get_time_range(dates.flat())
     x_labels=[]
@@ -439,7 +452,7 @@ h1 {
     layout = {
       margin: {
         l: 90,
-        r: 32,
+        r: 45,
         b: 32,
         t: 0,
         pad: 0
@@ -447,7 +460,7 @@ h1 {
       annotations:[{showarrow:false,text:''}],
       showlegend: false,
       yaxis: {  
-        domain: [0.03,1],
+        domain: [x_line_pos,1],
         showspikes: true,
         fixedrange:true,
         rangemode: 'tozero',
@@ -496,7 +509,7 @@ h1 {
       layout.xaxis.tickfont = {size:14,}
     }
     if (x_labels.length > 30) {
-      document.getElementById('chart').style='overflow:scroll;'
+      document.getElementById('chart').style='overflow:scroll;overflow-y: hidden;'
       layout.width = 22*x_labels.length
     } else {
       document.getElementById('chart').style=''
