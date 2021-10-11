@@ -139,9 +139,9 @@ h1 {
     <div class="graph" id='chart'></div>
     <div class="buttons">
       <span><input type="radio" name="time" value="yearly" id="yearly"  onclick="create_graph()">yearly</span>
-      <span><input type="radio" name="time" value="monthly" id="monthly" checked onclick="create_graph()">monthly</span>
-      <span><input type="radio" name="time" value="weekly" id="weekly" onclick="weekly_click()">weekly</span>
-      <span><input type="radio" name="time" value="daily" id="daily" onclick="daily_click()">daily</span>
+      <span><input type="radio" name="time" value="monthly" id="monthly" checked onclick="pag_click(this.parentElement.innerText)">monthly</span>
+      <span><input type="radio" name="time" value="weekly" id="weekly" onclick="pag_click(this.parentElement.innerText)">weekly</span>
+      <span><input type="radio" name="time" value="daily" id="daily" onclick="pag_click(this.parentElement.innerText)">daily</span>
     </div>
     <div class='chart-type'>
       <span>Lines<input type="radio" name="format" id="lines" checked='true' onclick="create_graph()"></span> 
@@ -167,6 +167,7 @@ h1 {
   consumption_data='{{ stats|safe }}'
   a=JSON.parse(test_data)
   a['3df1d4b96d8976ff5986393e8767f5b2'].events.splice(124)
+  console.log(a['3df1d4b96d8976ff5986393e8767f5b2'].events.slice(-1))
   chart = document.getElementById('chart')
   lines_setting = document.getElementById('lines')
   bars_setting = document.getElementById('bars')
@@ -177,24 +178,28 @@ h1 {
     pag_text = document.getElementById('pag-text')
     if(inactivity.innerText == 'Show Inactivity') inactivity.click()
     pag_text.innerText = ''
-    pag_period.innerText = 'Showing Day: '
     // if(!bars.checked) {
     //   bars_setting.click()
     //   }
     create_graph()
   }
-  function weekly_click(){
+  function pag_click(date_format){
     pag_text = document.getElementById('pag-text')
     pag_period = document.getElementById('pag-period')
     pag_text.innerText = ''
-    pag_period.innerText = 'Showing Week: '
+    if(date_format == 'daily'){
+      if(inactivity.innerText == 'Show Inactivity') inactivity.click()
+        pag_period.innerText = 'Showing Day: '
+      } else if (date_format == 'weekly'){
+        pag_period.innerText = 'Showing Week: '
+      } else if (date_format == 'monthly') {
+        pag_period.innerText = 'Showing Month: '
+      }
     create_graph()
   }
   function turn_page_forward(innerText){
-    daily = document.getElementById('daily')
-    weekly = document.getElementById('weekly')
     page_text = document.getElementById('pag-text')
-    if(daily.checked || weekly.checked){//|| weekly.checked
+    if(!yearly.checked){
       text = page_text.innerText.split('/')
       if(parseInt(text[0])+1 <= text[1]){
         text[0] = parseInt(text[0])+1
@@ -205,11 +210,8 @@ h1 {
   }
 
   function turn_page_back(innerText){
-    daily = document.getElementById('daily')
-    weekly = document.getElementById('weekly')
     page_text = document.getElementById('pag-text')
-
-    if(daily.checked || weekly.checked){//
+    if(!yearly.checked){
       text = page_text.innerText.split('/')
       if(text[0]-1){ 
         text[0] = text[0]-1
@@ -232,7 +234,15 @@ h1 {
           date = date[1]+'/'+date[0]+'/'+date[2]
           return week_number(new Date(date))
         }
-      } else {return []}
+      } else if(date_format=='monthly') { 
+        last_period = {energy:{x:'00/00/00'}}
+        get_period = (x) => {
+          date = x.split('/')
+          date = new Date(date[1]+'/'+date[0]+'/'+date[2])
+          return date.getMonth()
+        }
+      } else {
+        return []}
         // if(!page_number.innerText) page_number.innerText = 1
         page=[]
         for (i of events){
@@ -240,12 +250,14 @@ h1 {
           index = events.indexOf(i)
           period = get_period(x)
           last_period = get_period(last_period.energy.x)
+          console.log(period,last_period)
           if(index == 0){ 
             page.push(i) 
           } else {
             if(period == last_period){
               page.push(i)
             } else {
+              console.log('happening')
               pages.push(page)
               page = [i]
             }
@@ -253,9 +265,9 @@ h1 {
           last_period = i
         }
         pages_len = pages.length
-        
+        if(pages_len) pages.push(page)
         if (!page_text.innerText){//need to adjust if weekly comes into picture
-          page_text.innerText = '1/'+pages_len
+          page_text.innerText = '1/'+(pages_len+1)
         }
     return pages
   }
@@ -520,7 +532,7 @@ h1 {
       var date_format=i.value
       }
     }
-    if(date_format == 'daily' || date_format == 'weekly'){//or weekly
+    if(date_format != 'yearly'){
       document.getElementById('pagination').style='visibility:visible;'
     } else {
       document.getElementById('pagination').style='visibility:hidden;'
