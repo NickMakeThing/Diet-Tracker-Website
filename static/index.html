@@ -366,6 +366,13 @@ h1 {
     })
   }
 
+  function max_in_array(array){ 
+    var max = array.reduce(function(a, b) {
+        return Math.max(a, b);
+      }, 0);
+      return max
+  }
+
   function format_time(events,range){
     for(let i=0;i<events.length;i++){
       for(macro in events[i]){
@@ -395,13 +402,30 @@ h1 {
     }
     return events
   }
+
+  function check_ticklen(y_max,last_ticklen){
+    y_max=parseInt(y_max)
+    y_len = String(y_max).length
+    char_length = 8.75
+    
+    if (y_len >= 5) {
+      y_len = y_len-2
+      ticklen = (char_length*y_len) 
+    } else {
+      ticklen = (char_length*y_len) + last_ticklen
+    }
+    if (y_len == 1) ticklen += 7
+    console.log(y_len, ticklen , last_ticklen)
+    return ticklen
+  }
+
   function create_graph(){ 
     var hovertemplate = '%{y:,.0f}<br>'+'date: %{x}' + "<extra></extra>"
     var inactivity_button = document.getElementById('inactivity')
-    var energy = {name : 'energy' , marker : {color:'blue'}, ticklen:53, hovertemplate: hovertemplate}
-    var protein = {name : 'protein' , marker : {color:'red'}, yaxis:'y2', ticklen:35, hovertemplate: hovertemplate}
-    var fat = {name : 'fat' , marker : {color:'orange'}, yaxis:'y3', ticklen:17, hovertemplate: hovertemplate}
-    var carbs = {name : 'carbs' , marker : {color:'green'}, yaxis:'y4', ticklen:0, hovertemplate: hovertemplate}
+    var energy = {name : 'energy' , marker : {color:'blue'}, yaxis:'y', hovertemplate: hovertemplate}
+    var protein = {name : 'protein' , marker : {color:'red'}, yaxis:'y2', hovertemplate: hovertemplate}
+    var fat = {name : 'fat' , marker : {color:'orange'}, yaxis:'y3', hovertemplate: hovertemplate}
+    var carbs = {name : 'carbs' , marker : {color:'green'}, yaxis:'y4', hovertemplate: hovertemplate}
     var selected = []
     var dates = []
     
@@ -425,17 +449,8 @@ h1 {
       bars = setup_bars([energy,protein,fat,carbs]) //these are copied and added as lines later
       if (bars.length){
         var first_yaxis_color = bars[0].marker.color
-        var first_yaxis_ticklen = bars[0].ticklen
       }
     }
-
-    /*
-    to fix y axis. get values from trace/bar/lines, find the max y value
-    depending on the value and the line/bar name, adjust the ticklen 
-      var max_value = arr.reduce(function(a, b) {
-        return Math.max(a, b);
-      }, 0);
-    */
 
     x_line_pos = 0.03
     if (typeof InstallTrigger !== 'undefined'){//checks if browser is firefox
@@ -449,9 +464,49 @@ h1 {
         x_labels.push(i)
       }
     }
+    last_ticklen = 0
+    lines = []
+    ticklens = {
+      y:0,
+      y2:0,
+      y3:0,
+      y4:0
+    }
+    total_ticklen = 0
+    if (bars.length){
+      // adjust_timeline(bars,dates,layout)
+      if (lines_setting.checked){
+        bars.map(bar => {
+          max_y = max_in_array(bar.y)
+          if(bars.indexOf(bar) == 0){
+            last_ticklen = check_ticklen(max_y,last_ticklen)
+          } else {
+            ticklens[bar.yaxis]=last_ticklen
+            last_ticklen = check_ticklen(max_y,last_ticklen)
+          }
+          total_ticklen += last_ticklen
+          new_line = {...bar}
+          // if (new_line.name == 'energy') new_line.marker = {color:'rgb()'}
+          new_line.type = 'scatter'
+          lines.push(new_line)
+        })
+      }
+      selected = [bars, lines].flat()
+      console.log(a, selected, x_labels.length)
+    } 
+    left_margin = 90
+    console.log(total_ticklen)
+    if (total_ticklen <= 35) {
+      left_margin = 64
+    } else if (total_ticklen>245){
+      left_margin = left_margin + (total_ticklen/10) 
+    } else {
+      left_margin = left_margin + (total_ticklen/21) 
+    }
+    console.log('lm',left_margin)
     layout = {
       margin: {
-        l: 90,
+        l: Math.ceil(left_margin),
         r: 45,
         b: 32,
         t: 0,
@@ -464,7 +519,7 @@ h1 {
         showspikes: true,
         fixedrange:true,
         rangemode: 'tozero',
-        ticklen:first_yaxis_ticklen,
+        ticklen:ticklens['y'],
         tickfont:{color:first_yaxis_color}
       },
       yaxis2: {  
@@ -472,7 +527,7 @@ h1 {
         fixedrange:true,
         rangemode: 'tozero',
         overlaying:'y',
-        ticklen:35,
+        ticklen: ticklens['y2'],
         tickfont:{color:'red'}
       },
       // hovermode:"closest",
@@ -481,7 +536,7 @@ h1 {
         fixedrange:true,
         rangemode: 'tozero',
         overlaying:'y',
-        ticklen:17,
+        ticklen:ticklens['y3'],
         tickfont:{color:'orange'}
       },
       yaxis4: {  
@@ -489,7 +544,7 @@ h1 {
         fixedrange:true,
         rangemode: 'tozero',
         showdividers:false,
-        position:0,
+        ticklen:ticklens['y4'],
         overlaying:'y',
         tickfont:{color:'green'}
       },
@@ -514,21 +569,6 @@ h1 {
     } else {
       document.getElementById('chart').style=''
     }
-
-    lines = []
-    if (bars.length){
-      // adjust_timeline(bars,dates,layout)
-      if (lines_setting.checked){
-        bars.map(bar => {
-          new_line = {...bar}
-          // if (new_line.name == 'energy') new_line.marker = {color:'rgb()'}
-          new_line.type = 'scatter'
-          lines.push(new_line)
-        })
-      }
-      selected = [bars, lines].flat()
-      console.log(a, selected, x_labels.length)
-    } 
     
     Plotly.newPlot(chart, selected, layout)
     ticks = document.getElementsByClassName('ticks')
@@ -538,7 +578,9 @@ h1 {
     }
   }
   create_graph()
-
+  function paginate (){
+    //pass
+  }
   // function paginate(x,date_format){
   //   if (date_format == 'daily'){
   //     total_days = Math.ceil(x.length/24)
