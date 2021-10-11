@@ -76,6 +76,18 @@ h1 {
   -moz-appearance: none;
   -o-appearance: none;
 } */
+#slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  display: block;
+  width: 100px; 
+  height: 5px; 
+  background: darkgrey; 
+  outline: none; 
+  opacity: 0.8; 
+  -webkit-transition: .1s; 
+  transition: opacity .1s;
+}
 @media screen and (max-width: 1300px) {
   .super-container {
     display: flex;
@@ -154,6 +166,7 @@ h1 {
         <span id='pag-period'></span><span id='pag-text'></span>
         <button id='pag-right' onclick="turn_page_forward(innerText)">-&gt;</button>
       </div>
+      <input type="range" min="1" max="100" value="50" id="slider" onmouseup="slider_mouseup(this.value)" onmousedown="slider_mousedown()" onmousemove="slider_move(this.value)">
     </div>
   </div>
 </div>
@@ -172,17 +185,7 @@ h1 {
   lines_setting = document.getElementById('lines')
   bars_setting = document.getElementById('bars')
   buttons = document.getElementsByClassName('buttons')[0].getElementsByTagName('input')
-  
-  function daily_click(){
-    inactivity = document.getElementById('inactivity')
-    pag_text = document.getElementById('pag-text')
-    if(inactivity.innerText == 'Show Inactivity') inactivity.click()
-    pag_text.innerText = ''
-    // if(!bars.checked) {
-    //   bars_setting.click()
-    //   }
-    create_graph()
-  }
+
   function pag_click(date_format){
     pag_text = document.getElementById('pag-text')
     pag_period = document.getElementById('pag-period')
@@ -197,13 +200,37 @@ h1 {
       }
     create_graph()
   }
+
+  function slider_mouseup(value){
+    pag_text = document.getElementById('pag-text')
+    text = pag_text.innerText.split('/')
+    pag_text.innerText = value + '/' + text[1]
+    this.checked = false
+    create_graph()
+  }
+
+  function slider_mousedown(){
+    this.checked = true
+  }
+
+  function slider_move(value){
+    if(this.checked){
+    pag_text = document.getElementById('pag-text')
+    slider = document.getElementById('slider')
+    text = pag_text.innerText.split('/')
+    pag_text.innerText = value + '/' + text[1]
+    }
+  }
+
   function turn_page_forward(innerText){
     page_text = document.getElementById('pag-text')
+    slider = document.getElementById('slider')
     if(!yearly.checked){
       text = page_text.innerText.split('/')
       if(parseInt(text[0])+1 <= text[1]){
         text[0] = parseInt(text[0])+1
-        page_text.innerText = text[0]+'/'+text[1] //12/123
+        page_text.innerText = text[0]+'/'+text[1] 
+        slider.value = text[0]
       }
     }
     create_graph()
@@ -216,6 +243,7 @@ h1 {
       if(text[0]-1){ 
         text[0] = text[0]-1
         page_text.innerText = text[0]+'/'+text[1] 
+        slider.value = text[0]
       }
     }
     create_graph()
@@ -223,6 +251,7 @@ h1 {
 
   function paginate(events,date_format){
       page_text = document.getElementById('pag-text')
+      slider = document.getElementById('slider')
       pages = []   
       if(date_format=='daily'){
         last_period = {energy:{x:'0am 00/00'}} 
@@ -250,14 +279,12 @@ h1 {
           index = events.indexOf(i)
           period = get_period(x)
           last_period = get_period(last_period.energy.x)
-          console.log(period,last_period)
           if(index == 0){ 
             page.push(i) 
           } else {
             if(period == last_period){
               page.push(i)
             } else {
-              console.log('happening')
               pages.push(page)
               page = [i]
             }
@@ -268,6 +295,8 @@ h1 {
         if(pages_len) pages.push(page)
         if (!page_text.innerText){//need to adjust if weekly comes into picture
           page_text.innerText = '1/'+(pages_len+1)
+          slider.value = 1
+          slider.max = pages_len+1
         }
     return pages
   }
@@ -534,8 +563,10 @@ h1 {
     }
     if(date_format != 'yearly'){
       document.getElementById('pagination').style='visibility:visible;'
+      document.getElementById('slider').style='visibility:visible;'
     } else {
       document.getElementById('pagination').style='visibility:hidden;'
+      document.getElementById('slider').style='visibility:hidden;'
       document.getElementById('pag-text').innerText = ''
     }
     events_dates = collect(a)
@@ -561,6 +592,7 @@ h1 {
       text = text.split('/')
       page_number = text[0]
       events = pages[page_number-1]
+      
     }
     x_line_pos = 0.03
     if (typeof InstallTrigger !== 'undefined'){//checks if browser is firefox
