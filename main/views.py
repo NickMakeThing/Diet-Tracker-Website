@@ -58,7 +58,6 @@ class ReceiveProductInformation(CreateAPIView):
                 protein = data['protein'],
                 fat = data['fat'],
                 carbs = data['carbs'],
-                sugars = data['sugars'],
             )
         return Response('hey')
         
@@ -78,6 +77,5 @@ xhr.send(JSON.stringify({
     "protein":5,
     "fat":2,
     "carbs":3,
-    "sugars":1
 }));
 """

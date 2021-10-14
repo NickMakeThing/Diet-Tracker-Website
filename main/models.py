@@ -17,7 +17,6 @@ class Product(models.Model):
     protein = models.FloatField()
     fat = models.FloatField()
     carbs = models.FloatField()
-    sugars = models.FloatField()
 
 class WeightChange(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
