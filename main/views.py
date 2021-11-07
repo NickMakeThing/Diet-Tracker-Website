@@ -32,15 +32,13 @@ class Index(TemplateView):
         return render(request, self.template_name, self.get_context_data())
 
 class ReceiveProductInformation(CreateAPIView):
-    #lacks validation 
-    #need control to only accept only from rpi. maybe use password from env variable.
     http_method_names = ['post']
     def create(self, request, *args, **kwargs):
         data = request.data
         product_code = hash_product(data)
         product = Product.objects.filter(code=product_code) #returns as a queryset. [0] gets the actual object
-        if product.exists(): #count() if exists doesnt work
-            if data['weight'] >= product[0].current_weight + 10:#need to do something here to compensate for the possibility of current_weight going into negatives
+        if product.exists(): 
+            if data['weight'] >= product[0].current_weight + 10:
                 product.update(current_weight=data['weight'])
             elif data['weight'] <= product[0].current_weight - 10:
                 weight_change = product[0].current_weight - data['weight']
