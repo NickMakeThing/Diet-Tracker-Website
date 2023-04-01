@@ -6,4 +6,4 @@ The photos would be sent to an AWS service called [Textract](https://aws.amazon.
 The back end was written in python using the Django framework. The front end was written in plain javascript with HTML and CSS. The user is presented with a  controllable graph, which provides options to show how much energy, fats, protein and carbs were consumed on a daily, weekly or monthly basis.
 
 The diet tracker system was built as part of a group project that was part of my bachelor degree.  
-A demonstration can be viewed [here](https://streamable.com/syd3qt)
+A demonstration can be viewed [here](https://streamable.com/syd3qt).
