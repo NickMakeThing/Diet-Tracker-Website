@@ -1,5 +1,5 @@
 # Diet-Tracker-Website
-Diet-Tracker-Website consists of a basic front end, back end, and python code that runs on a raspberry pi.
+Diet-Tracker consists of a basic website front end, website back end, and python code that runs on a raspberry pi. This repository holds code for the website's backend and frontend.
 The code on the raspberry pi was to receive/process weight information from a strain gauge and take photos of the nutritional labels on packaged foods.  
 The photos would be sent to an AWS service called [Textract](https://aws.amazon.com/textract/), which would return machine-readable text that is extracted from the photo.
 
